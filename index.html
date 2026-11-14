@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Celine의 페이지</title>
+  <style>
+    :root {
+      --bg: #fdf7f2;
+      --card: #ffffff;
+      --text: #2b2330;
+      --muted: #7a6f80;
+      --accent: #e0607e;
+      --accent-soft: #fde4ea;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1820;
+        --card: #27222c;
+        --text: #f3eef5;
+        --muted: #b3a8b8;
+        --accent: #ff8aa5;
+        --accent-soft: #3a2730;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    main {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      border-radius: 24px;
+      padding: 40px 28px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .emoji { font-size: 56px; line-height: 1; }
+    h1 { margin: 16px 0 8px; font-size: 30px; }
+    p.lead { margin: 0 0 28px; color: var(--muted); font-size: 16px; line-height: 1.6; }
+    button {
+      border: 0;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-size: 17px;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform .1s;
+    }
+    button:active { transform: scale(0.96); }
+    .count {
+      margin-top: 20px;
+      font-size: 15px;
+      color: var(--muted);
+    }
+    .message {
+      margin-top: 16px;
+      min-height: 1.6em;
+      background: var(--accent-soft);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 16px;
+    }
+    footer { margin-top: 28px; font-size: 13px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="emoji">👋</div>
+    <h1>안녕, 친구들!</h1>
+    <p class="lead">Celine의 첫 번째 웹페이지에 온 걸 환영해.<br>아래 버튼을 눌러서 인사를 남겨줘!</p>
+    <button id="hi">반가워 💖</button>
+    <div class="count" id="count">아직 아무도 안 눌렀어</div>
+    <div class="message" id="message">오늘도 좋은 하루 보내 ☀️</div>
+    <footer>Made with ❤️ by Celine</footer>
+  </main>
+  <script>
+    const messages = [
+      "오늘도 좋은 하루 보내 ☀️",
+      "와줘서 고마워! 🥰",
+      "너 오늘 최고야 ✨",
+      "맛있는 거 먹자 🍰",
+      "우리 또 놀자 🎈",
+      "웃는 얼굴이 제일 예뻐 😊",
+      "힘내! 응원할게 💪"
+    ];
+    let clicks = 0;
+    document.getElementById("hi").addEventListener("click", () => {
+      clicks++;
+      document.getElementById("count").textContent = `${clicks}번 인사했어!`;
+      document.getElementById("message").textContent =
+        messages[Math.floor(Math.random() * messages.length)];
+    });
+  </script>
+</body>
+</html>
