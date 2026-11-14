@@ -200,6 +200,94 @@
       border: 2px dashed var(--line);
       border-radius: 18px;
     }
+
+    /* 달력 */
+    .cal {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px 8px 8px;
+      margin-bottom: 12px;
+    }
+    .cal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px 8px;
+    }
+    .cal-title { font-size: 22px; font-weight: 800; }
+    .cal-nav {
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .cal-nav:active { background: var(--line); }
+    .cal-today {
+      display: block;
+      margin: 0 auto 10px;
+      min-height: 40px;
+      padding: 6px 20px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+    .cal-wd {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      padding-bottom: 6px;
+    }
+    .sun { color: #e5484d; }
+    .sat { color: #4f7cff; }
+    .cal-day {
+      min-height: 92px;
+      border-top: 1px solid var(--line);
+      padding: 6px 2px 4px;
+      cursor: pointer;
+      min-width: 0;
+      border-radius: 6px;
+    }
+    .cal-day.other { opacity: .35; }
+    .cal-day.selected { background: var(--accent-soft); }
+    .cal-num {
+      width: 30px;
+      height: 30px;
+      margin: 0 auto 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .cal-day.today .cal-num { background: var(--accent); color: var(--accent-text); }
+    .ev {
+      font-size: 12px;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      padding: 1px 3px;
+      margin-top: 3px;
+      border-left: 3px solid var(--c);
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--c) 16%, transparent);
+    }
+    .ev.late { text-decoration: underline wavy var(--warn); }
+    .ev-more { font-size: 11px; color: var(--muted); text-align: center; margin-top: 2px; }
+    .day-title { font-size: 17px; font-weight: 700; margin: 16px 4px 10px; }
   </style>
 </head>
 <body>
@@ -244,6 +332,19 @@
 
     <div class="section-title" id="todoTitle">해야 할 숙제</div>
     <ul id="todoList"></ul>
+
+    <div class="section-title">달력으로 보기</div>
+    <div class="cal">
+      <div class="cal-head">
+        <button type="button" class="cal-nav" id="calPrev" aria-label="이전 달">‹</button>
+        <div class="cal-title" id="calTitle"></div>
+        <button type="button" class="cal-nav" id="calNext" aria-label="다음 달">›</button>
+      </div>
+      <button type="button" class="cal-today" id="calToday">오늘</button>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="day-title" id="dayTitle"></div>
+    <ul id="dayList"></ul>
 
     <div class="section-title" id="doneTitle">완료한 숙제</div>
     <ul id="doneList"></ul>
@@ -311,7 +412,106 @@
         "남은 숙제가 없어요 🎉");
       fillList(document.getElementById("doneList"), done, null);
       document.getElementById("doneTitle").style.display = done.length ? "" : "none";
+
+      renderCalendar(todo);
     }
+
+    // ===== 달력 =====
+    const SUBJECT_COLORS = ["#f2c94c", "#6c8cff", "#b07cf5", "#4cc38a", "#ff7a8a", "#3dc4d6", "#ff9f43"];
+    function subjectColor(subject) {
+      let h = 0;
+      for (const ch of subject) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+      return SUBJECT_COLORS[h % SUBJECT_COLORS.length];
+    }
+    function fmt(d) {
+      const p = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+    const now = new Date();
+    let calYear = now.getFullYear();
+    let calMonth = now.getMonth();
+    let selectedDate = null;
+
+    function renderCalendar(todo) {
+      document.getElementById("calTitle").textContent = `${calYear}. ${calMonth + 1}.`;
+      const grid = document.getElementById("calGrid");
+      grid.innerHTML = "";
+
+      ["일", "월", "화", "수", "목", "금", "토"].forEach((w, i) => {
+        const el = document.createElement("div");
+        el.className = "cal-wd" + (i === 0 ? " sun" : i === 6 ? " sat" : "");
+        el.textContent = w;
+        grid.appendChild(el);
+      });
+
+      const first = new Date(calYear, calMonth, 1);
+      const last = new Date(calYear, calMonth + 1, 0);
+      const start = new Date(calYear, calMonth, 1 - first.getDay());
+      const cells = Math.ceil((first.getDay() + last.getDate()) / 7) * 7;
+      const today = todayStr();
+
+      for (let i = 0; i < cells; i++) {
+        const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+        const ds = fmt(d);
+        const cell = document.createElement("div");
+        cell.className = "cal-day";
+        if (d.getMonth() !== calMonth) cell.classList.add("other");
+        if (ds === today) cell.classList.add("today");
+        if (ds === selectedDate) cell.classList.add("selected");
+
+        const num = document.createElement("div");
+        num.className = "cal-num" + (d.getDay() === 0 ? " sun" : d.getDay() === 6 ? " sat" : "");
+        num.textContent = d.getDate();
+        cell.appendChild(num);
+
+        const evs = todo.filter(it => it.due === ds);
+        evs.slice(0, 3).forEach(it => {
+          const ev = document.createElement("div");
+          ev.className = "ev" + (ds < today ? " late" : "");
+          ev.style.setProperty("--c", subjectColor(it.subject));
+          ev.textContent = `${it.subject} ${it.content}`;
+          cell.appendChild(ev);
+        });
+        if (evs.length > 3) {
+          const more = document.createElement("div");
+          more.className = "ev-more";
+          more.textContent = `+${evs.length - 3}`;
+          cell.appendChild(more);
+        }
+
+        cell.addEventListener("click", () => {
+          selectedDate = selectedDate === ds ? null : ds;
+          render();
+        });
+        grid.appendChild(cell);
+      }
+
+      const dayTitle = document.getElementById("dayTitle");
+      const dayList = document.getElementById("dayList");
+      if (selectedDate) {
+        dayTitle.textContent = `${dueLabel(selectedDate)} 남은 숙제`;
+        fillList(dayList, todo.filter(it => it.due === selectedDate), "이 날은 남은 숙제가 없어요");
+      } else {
+        dayTitle.textContent = "";
+        dayList.innerHTML = "";
+      }
+    }
+
+    function moveMonth(delta) {
+      const d = new Date(calYear, calMonth + delta, 1);
+      calYear = d.getFullYear();
+      calMonth = d.getMonth();
+      render();
+    }
+    document.getElementById("calPrev").addEventListener("click", () => moveMonth(-1));
+    document.getElementById("calNext").addEventListener("click", () => moveMonth(1));
+    document.getElementById("calToday").addEventListener("click", () => {
+      const t = new Date();
+      calYear = t.getFullYear();
+      calMonth = t.getMonth();
+      selectedDate = todayStr();
+      render();
+    });
 
     function fillList(ul, list, emptyText) {
       ul.innerHTML = "";
