@@ -3,106 +3,427 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Celine의 페이지</title>
+  <title>숙제 도우미</title>
   <style>
     :root {
-      --bg: #fdf7f2;
+      --bg: #f6f4fb;
       --card: #ffffff;
-      --text: #2b2330;
-      --muted: #7a6f80;
-      --accent: #e0607e;
-      --accent-soft: #fde4ea;
+      --text: #231f2e;
+      --muted: #6f6880;
+      --line: #e4dff0;
+      --accent: #6a4cf5;
+      --accent-text: #ffffff;
+      --accent-soft: #ece7ff;
+      --done: #2e9e6a;
+      --warn: #d9480f;
+      --warn-soft: #fff0e6;
+      --danger: #c92a2a;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #1c1820;
-        --card: #27222c;
-        --text: #f3eef5;
-        --muted: #b3a8b8;
-        --accent: #ff8aa5;
-        --accent-soft: #3a2730;
+        --bg: #16141c;
+        --card: #221f2b;
+        --text: #f1eef8;
+        --muted: #a9a2ba;
+        --line: #353042;
+        --accent: #9a85ff;
+        --accent-text: #16141c;
+        --accent-soft: #2d2745;
+        --done: #5fd39b;
+        --warn: #ff9a5c;
+        --warn-soft: #3a2619;
+        --danger: #ff7b7b;
       }
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      min-height: 100vh;
       background: var(--bg);
       color: var(--text);
       font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.5;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+    h1 { font-size: 26px; margin: 4px 0 16px; }
+
+    /* 요약 */
+    .summary {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--accent);
+      color: var(--accent-text);
+      border-radius: 20px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(80, 50, 200, 0.25);
+    }
+    .summary .label { font-size: 15px; opacity: .85; }
+    .summary .big { font-size: 26px; font-weight: 800; margin-top: 2px; }
+
+    /* 카드 */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card h2 { font-size: 19px; margin: 0 0 14px; }
+
+    /* 입력 폼 */
+    label { display: block; font-weight: 600; margin: 14px 0 6px; font-size: 16px; }
+    label:first-of-type { margin-top: 0; }
+    input, select {
+      width: 100%;
+      min-height: 54px;
+      padding: 12px 14px;
+      font: inherit;
+      font-size: 18px;
+      color: var(--text);
+      background: var(--bg);
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus { border-color: var(--accent); }
+    .row { display: flex; gap: 12px; }
+    .row > div { flex: 1; min-width: 0; }
+    @media (max-width: 440px) {
+      .row { flex-direction: column; gap: 0; }
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip {
+      min-height: 44px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 2px solid var(--line);
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .chip:active { background: var(--accent-soft); }
+    .btn {
+      width: 100%;
+      min-height: 60px;
+      margin-top: 20px;
+      border: 0;
+      border-radius: 16px;
+      background: var(--accent);
+      color: var(--accent-text);
+      font: inherit;
+      font-size: 20px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn:active { transform: scale(0.98); }
+    .error { color: var(--danger); font-size: 15px; margin-top: 10px; min-height: 1.2em; }
+
+    /* 목록 */
+    .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--muted);
+      margin: 24px 4px 10px;
+    }
+    ul { list-style: none; padding: 0; margin: 0; }
+    .item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .item.overdue { border-color: var(--warn); background: var(--warn-soft); }
+    .check {
+      flex: none;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      background: transparent;
+      color: var(--accent-text);
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px;
     }
-    main {
-      width: 100%;
-      max-width: 520px;
-      background: var(--card);
-      border-radius: 24px;
-      padding: 40px 28px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-    .emoji { font-size: 56px; line-height: 1; }
-    h1 { margin: 16px 0 8px; font-size: 30px; }
-    p.lead { margin: 0 0 28px; color: var(--muted); font-size: 16px; line-height: 1.6; }
-    button {
-      border: 0;
-      background: var(--accent);
-      color: #fff;
-      font: inherit;
-      font-size: 17px;
-      font-weight: 600;
-      padding: 14px 28px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: transform .1s;
-    }
-    button:active { transform: scale(0.96); }
-    .count {
-      margin-top: 20px;
-      font-size: 15px;
-      color: var(--muted);
-    }
-    .message {
-      margin-top: 16px;
-      min-height: 1.6em;
+    .item.done .check { background: var(--done); border-color: var(--done); }
+    .body { flex: 1; min-width: 0; }
+    .subject {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
       background: var(--accent-soft);
-      border-radius: 14px;
-      padding: 12px;
-      font-size: 16px;
+      border-radius: 999px;
+      padding: 2px 10px;
     }
-    footer { margin-top: 28px; font-size: 13px; color: var(--muted); }
+    .task { font-size: 18px; font-weight: 600; margin: 6px 0 4px; word-break: break-word; }
+    .meta { font-size: 15px; color: var(--muted); }
+    .meta .due-tag { font-weight: 700; color: var(--warn); }
+    .item.done .task { text-decoration: line-through; color: var(--muted); }
+    .item.done .subject { opacity: .6; }
+    .del {
+      flex: none;
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .del:active { background: var(--line); }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px 16px;
+      background: var(--card);
+      border: 2px dashed var(--line);
+      border-radius: 18px;
+    }
   </style>
 </head>
 <body>
-  <main>
-    <div class="emoji">👋</div>
-    <h1>안녕, 친구들!</h1>
-    <p class="lead">Celine의 첫 번째 웹페이지에 온 걸 환영해.<br>아래 버튼을 눌러서 인사를 남겨줘!</p>
-    <button id="hi">반가워 💖</button>
-    <div class="count" id="count">아직 아무도 안 눌렀어</div>
-    <div class="message" id="message">오늘도 좋은 하루 보내 ☀️</div>
-    <footer>Made with ❤️ by Celine</footer>
-  </main>
+  <div class="wrap">
+    <h1>📚 숙제 도우미</h1>
+
+    <div class="summary" aria-live="polite">
+      <div class="label">아직 안 끝난 숙제</div>
+      <div class="big" id="summary">남은 숙제 0개, 총 0분</div>
+    </div>
+
+    <form class="card" id="form" novalidate>
+      <h2>숙제 추가하기</h2>
+
+      <label for="subject">과목</label>
+      <input id="subject" type="text" placeholder="예: 수학" autocomplete="off" maxlength="30">
+      <div class="chips" id="subjectChips">
+        <button type="button" class="chip">국어</button>
+        <button type="button" class="chip">수학</button>
+        <button type="button" class="chip">영어</button>
+        <button type="button" class="chip">과학</button>
+        <button type="button" class="chip">사회</button>
+      </div>
+
+      <label for="content">숙제 내용</label>
+      <input id="content" type="text" placeholder="예: 익힘책 24~27쪽" autocomplete="off" maxlength="200">
+
+      <div class="row">
+        <div>
+          <label for="due">마감일</label>
+          <input id="due" type="date">
+        </div>
+        <div>
+          <label for="minutes">예상 시간(분)</label>
+          <input id="minutes" type="number" inputmode="numeric" min="1" max="1440" step="1" placeholder="30">
+        </div>
+      </div>
+
+      <button class="btn" type="submit">＋ 추가</button>
+      <div class="error" id="error" role="alert"></div>
+    </form>
+
+    <div class="section-title" id="todoTitle">해야 할 숙제</div>
+    <ul id="todoList"></ul>
+
+    <div class="section-title" id="doneTitle">완료한 숙제</div>
+    <ul id="doneList"></ul>
+  </div>
+
   <script>
-    const messages = [
-      "오늘도 좋은 하루 보내 ☀️",
-      "와줘서 고마워! 🥰",
-      "너 오늘 최고야 ✨",
-      "맛있는 거 먹자 🍰",
-      "우리 또 놀자 🎈",
-      "웃는 얼굴이 제일 예뻐 😊",
-      "힘내! 응원할게 💪"
-    ];
-    let clicks = 0;
-    document.getElementById("hi").addEventListener("click", () => {
-      clicks++;
-      document.getElementById("count").textContent = `${clicks}번 인사했어!`;
-      document.getElementById("message").textContent =
-        messages[Math.floor(Math.random() * messages.length)];
+    const STORAGE_KEY = "homework-helper-v1";
+    let items = load();
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const data = raw ? JSON.parse(raw) : [];
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function save() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      } catch (e) { /* 저장 불가한 환경에서는 무시 */ }
+    }
+
+    // 오늘 날짜 (YYYY-MM-DD, 내 기기 시간 기준)
+    function todayStr() {
+      const d = new Date();
+      const p = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+    function daysLeft(due) {
+      const [y, m, d] = due.split("-").map(Number);
+      const [ty, tm, td] = todayStr().split("-").map(Number);
+      return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(ty, tm - 1, td)) / 86400000);
+    }
+    function dueLabel(due) {
+      const [, m, d] = due.split("-").map(Number);
+      const days = ["일", "월", "화", "수", "목", "금", "토"];
+      const [y] = due.split("-").map(Number);
+      const wd = days[new Date(y, m - 1, d).getDay()];
+      return `${m}월 ${d}일 (${wd})`;
+    }
+    function dueTag(due) {
+      const n = daysLeft(due);
+      if (n < 0) return `${-n}일 지남`;
+      if (n === 0) return "오늘까지!";
+      if (n === 1) return "내일까지";
+      return `${n}일 남음`;
+    }
+
+    function byDue(a, b) {
+      if (a.due !== b.due) return a.due < b.due ? -1 : 1;
+      return a.createdAt - b.createdAt;
+    }
+
+    function render() {
+      const todo = items.filter(i => !i.done).sort(byDue);
+      const done = items.filter(i => i.done).sort(byDue);
+
+      const totalMin = todo.reduce((s, i) => s + (Number(i.minutes) || 0), 0);
+      document.getElementById("summary").textContent =
+        `남은 숙제 ${todo.length}개, 총 ${totalMin}분`;
+
+      fillList(document.getElementById("todoList"), todo,
+        "남은 숙제가 없어요 🎉");
+      fillList(document.getElementById("doneList"), done, null);
+      document.getElementById("doneTitle").style.display = done.length ? "" : "none";
+    }
+
+    function fillList(ul, list, emptyText) {
+      ul.innerHTML = "";
+      if (!list.length) {
+        if (emptyText) {
+          const li = document.createElement("li");
+          li.className = "empty";
+          li.textContent = emptyText;
+          ul.appendChild(li);
+        }
+        return;
+      }
+      for (const it of list) {
+        const li = document.createElement("li");
+        li.className = "item";
+        if (it.done) li.classList.add("done");
+        if (!it.done && daysLeft(it.due) < 0) li.classList.add("overdue");
+
+        const check = document.createElement("button");
+        check.className = "check";
+        check.type = "button";
+        check.textContent = it.done ? "✓" : "";
+        check.setAttribute("aria-label", it.done ? "완료 취소" : "완료로 표시");
+        check.addEventListener("click", () => {
+          it.done = !it.done;
+          save();
+          render();
+        });
+
+        const body = document.createElement("div");
+        body.className = "body";
+        const subject = document.createElement("span");
+        subject.className = "subject";
+        subject.textContent = it.subject;
+        const task = document.createElement("div");
+        task.className = "task";
+        task.textContent = it.content;
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.append(`📅 ${dueLabel(it.due)} · ⏱ ${it.minutes}분`);
+        if (!it.done) {
+          const tag = document.createElement("span");
+          tag.className = "due-tag";
+          tag.textContent = ` · ${dueTag(it.due)}`;
+          meta.appendChild(tag);
+        }
+        body.append(subject, task, meta);
+
+        const del = document.createElement("button");
+        del.className = "del";
+        del.type = "button";
+        del.textContent = "🗑";
+        del.setAttribute("aria-label", "삭제");
+        del.addEventListener("click", () => {
+          if (!confirm(`"${it.content}" 숙제를 지울까요?`)) return;
+          items = items.filter(x => x.id !== it.id);
+          save();
+          render();
+        });
+
+        li.append(check, body, del);
+        ul.appendChild(li);
+      }
+    }
+
+    // 과목 빠른 선택
+    document.getElementById("subjectChips").addEventListener("click", e => {
+      if (e.target.classList.contains("chip")) {
+        document.getElementById("subject").value = e.target.textContent;
+        document.getElementById("content").focus();
+      }
     });
+
+    // 마감일 기본값: 오늘
+    document.getElementById("due").value = todayStr();
+
+    document.getElementById("form").addEventListener("submit", e => {
+      e.preventDefault();
+      const subject = document.getElementById("subject").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const due = document.getElementById("due").value;
+      const minutesRaw = document.getElementById("minutes").value.trim();
+      const minutes = Number(minutesRaw);
+      const err = document.getElementById("error");
+
+      if (!subject) return showError("과목을 입력해 주세요.", "subject");
+      if (!content) return showError("숙제 내용을 입력해 주세요.", "content");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(due)) return showError("마감일을 골라 주세요.", "due");
+      if (!minutesRaw || !Number.isInteger(minutes) || minutes < 1 || minutes > 1440)
+        return showError("예상 시간을 1~1440 사이의 숫자(분)로 입력해 주세요.", "minutes");
+
+      err.textContent = "";
+      items.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        subject, content, due, minutes,
+        done: false,
+        createdAt: Date.now()
+      });
+      save();
+      render();
+
+      document.getElementById("content").value = "";
+      document.getElementById("minutes").value = "";
+      document.getElementById("content").focus();
+
+      function showError(msg, field) {
+        err.textContent = msg;
+        document.getElementById(field).focus();
+      }
+    });
+
+    render();
   </script>
 </body>
 </html>
