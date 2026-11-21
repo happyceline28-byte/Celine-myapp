@@ -1,1 +1,1 @@
-# Celine-myapp
+# homework helper-app
