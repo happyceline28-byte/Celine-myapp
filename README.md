@@ -1,1 +1,1 @@
-# homework helper-app
+# homework-helper-app
